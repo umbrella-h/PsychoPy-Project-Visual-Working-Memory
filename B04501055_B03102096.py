@@ -1,3 +1,8 @@
+#TA評分 8/10
+'''架構完整，註解勉強尚可，然而程式仍有些許不正確，例如視角規格並非簡報裡所指定，
+反應時間應為 probe 階段的 2 秒內，超過 2 秒即不再收集反應按鍵。
+建議 trials 數的變數應用更有彈性的寫法，例如使用 len 函數。'''
+
 from psychopy import visual,event,core,monitors,tools, gui
 import numpy as np
 import pandas as pd
