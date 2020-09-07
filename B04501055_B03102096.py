@@ -1,7 +1,7 @@
 #TA評分 8/10
-'''架構完整，註解勉強尚可，然而程式仍有些許不正確，例如視角規格並非簡報裡所指定，
-反應時間應為 probe 階段的 2 秒內，超過 2 秒即不再收集反應按鍵。
-建議 trials 數的變數應用更有彈性的寫法，例如使用 len 函數。'''
+'''架構完整，註解勉強尚可，然而程式仍有些許不正確，例如視角規格並非簡報裡所指定，---(line 67 附近已有指定unit為degree?)
+反應時間應為 probe 階段的 2 秒內，超過 2 秒即不再收集反應按鍵。---(已修正)
+建議 trials 數的變數應用更有彈性的寫法，例如使用 len 函數。---(是為了測試方便，line 163 已加註解)'''
 
 from psychopy import visual,event,core,monitors,tools, gui
 import numpy as np
@@ -160,12 +160,12 @@ record = [[], [], [], [], [],
 #record 4 encoding colors, 4 probe colors, 1 ans, 1 loc_r(random number for location in each quadrant)
 
 blocks_num=2
-trials_num_per_block=3
+trials_num_per_block=3 # 3 for test, there're 40 stim set in each csv file; try to use len(data_frame) for flexibility, eg: len(data_s1)
 pre_duration=0.2
 stimuli_duration_e=0.1
 stimuli_interval=0.9
 stimuli_duration_p=2.0
-response_duration=0.95
+trial_interval=random.uniform(0.65,0.95)
 
 for b in range(blocks_num):
     for t in range(trials_num_per_block):
@@ -176,10 +176,10 @@ for b in range(blocks_num):
         trial_r = random.randint(0,39)
         add(record, data[b], trial_r, loc_r)
 
-text.text = 'Your task is to as accurately and quickly as possible determine whether the two sets of colors are identical.' 
+text.text = 'Your task is to determine whether the two sets of colors are identical.\n\nOnce the second color set shows up, react as accurately and quickly as possible.\n\nPress any key to continue.' 
 text.draw()
 win.flip()
-core.wait(5.0)
+event.waitKeys()
 
 text.text = 'Session 1\n\nPress the key \'M\' for identical sets, and the key \'C\' for different sets.\n\nPress any key to start.' 
 text.draw()
@@ -206,16 +206,13 @@ for b in range(blocks_num):
         win.flip()
         core.wait(stimuli_interval)
 
-        en_pr(win, record, current_t_index, 'pr')
-        core.wait(stimuli_duration_p)
-
         current_key='HAHA'
         current_rt=5487
         current_crt=5555
         event.clearEvents()
         clock_key.reset()
-        while clock_key.getTime()<response_duration:
-            win.flip()
+        while clock_key.getTime()<stimuli_duration_p:
+            en_pr(win, record, current_t_index, 'pr')
             key_info=event.getKeys(keyList=['m','c'],timeStamped=clock_key)
             if key_info:
                 key_details=key_info[0]
@@ -237,6 +234,8 @@ for b in range(blocks_num):
         rkey.append(current_key)
         rt.append(current_rt)
         crt.append(current_crt)
+        win.flip()
+        core.wait(trial_interval)
 
         if ((current_t_index+1)%trials_num_per_block==0)and((current_t_index+1)%(trials_num_per_block*blocks_num)!=0):
             text.text = 'Session 2\n\nPress the key \'M\' for identical sets, and the key \'C\' for different sets.\n\nPress any key to start.' 
